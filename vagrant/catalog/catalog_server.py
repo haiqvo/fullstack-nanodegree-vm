@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, render_template, request, redirect, url_for, jsonify
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from db_manager import Base, Category
@@ -13,7 +13,9 @@ session = DBSession()
 
 @app.route('/')
 def catalogHomePage():
-    return "Hello"
+    categories = session.query(Category).all()
+    print categories
+    return render_template('index.html', categories=categories)
 
 
 if __name__ == "__main__":
