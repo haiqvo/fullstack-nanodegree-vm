@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from db_manager import Category, Base
+from db_manager import Category, Base, Item
 
 engine = create_engine('sqlite:///categoryProject.db')
 # Bind the engine to the metadata of the Base class so that the
@@ -33,7 +33,7 @@ category3 = Category(name="Baseball")
 session.add(category3)
 session.commit()
 
-category4 = Category(name="Frisball")
+category4 = Category(name="Frisbee")
 
 session.add(category4)
 session.commit()
@@ -61,4 +61,50 @@ session.commit()
 category9 = Category(name="Hockey")
 
 session.add(category9)
+session.commit()
+
+description1 = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean sit amet justo quis velit maximus auctor nec vitae nisi. Integer eros nulla, elementum a nunc at, efficitur dapibus mauris. Phasellus porttitor lobortis lacus, viverra sollicitudin urna venenatis vitae. Cras cursus nulla id metus elementum, non aliquet tellus dignissim. Donec dictum urna leo, dignissim"
+item1 = Item(name="Stick", description=description1, category_id=category9.id)
+
+session.add(item1)
+session.commit()
+
+item2 = Item(name="Google", description=description1, category_id=category5.id)
+
+session.add(item2)
+session.commit()
+
+item3 = Item(name="Snowboard", description=description1, category_id=category5.id)
+
+session.add(item3)
+session.commit()
+
+item4 = Item(name="Two shinguards", description=description1, category_id=category1.id)
+
+session.add(item4)
+session.commit()
+
+item5 = Item(name="Shinguards", description=description1, category_id=category1.id)
+
+session.add(item5)
+session.commit()
+
+item6 = Item(name="Frisbee", description=description1, category_id=category4.id)
+
+session.add(item6)
+session.commit()
+
+item7 = Item(name="Bat", description=description1, category_id=category3.id)
+
+session.add(item7)
+session.commit()
+
+item8 = Item(name="Jersey", description=description1, category_id=category1.id)
+
+session.add(item8)
+session.commit()
+
+item9 = Item(name="Soccer Cleats", description=description1, category_id=category1.id)
+
+session.add(item9)
 session.commit()

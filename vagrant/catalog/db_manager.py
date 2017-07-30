@@ -26,8 +26,8 @@ class Item(Base):
     id = Column(Integer, primary_key = True)
     name = Column(String(80), nullable = False)
     description = Column(String(500))
-    user_id = Column(Integer, ForeignKey('user.id'))
-    user = relationship(User)
+    category_id = Column(Integer, ForeignKey('category.id'))
+    category = relationship(Category)
 
 
 engine = create_engine('sqlite:///categoryProject.db')
