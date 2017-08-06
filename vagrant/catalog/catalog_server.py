@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, jsonify, flash
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from db_manager import Base, Category, Item
+from db_manager import Base, Category, Item, User
 
 from flask import session as login_session
 import random, string
@@ -24,12 +24,16 @@ DBSession = sessionmaker(bind=engine)
 session = DBSession()
 
 @app.route('/')
+@app.route('/catalog/')
 def catalogHomePage():
     categories = session.query(Category).all()
-    items = session.query(Item).order_by(Item.id.desc()).limit(10).all()
-    print categories
-    print items
-    return render_template('index.html', categories=categories, items=items, itemHeader="Latest Items")
+    items = session.query(Item.id, Item.name, Category.name.label("cname")).join(Category).order_by(Item.id.desc()).limit(10).all()
+    for i in items:
+        print i.cname
+    if 'username' not in login_session:
+        return render_template('publicIndex.html', categories=categories, items=items, itemHeader="Latest Items")
+    else:
+        return render_template('index.html', categories=categories, items=items, itemHeader="Latest Items")
 
 @app.route('/login')
 def showLogin():
@@ -37,22 +41,62 @@ def showLogin():
     login_session['state'] = state
     return render_template('login.html', STATE=state)
 
+@app.route('/logout')
+def logout():
+    gdisconnect()
+    return redirect(url_for('catalogHomePage'))
 
 @app.route('/catalog/<category>/items')
 def catalogFilter(category):
     categories = session.query(Category).all()
     category = session.query(Category).filter_by(name=category).one()
-    items = session.query(Item).filter_by(category_id=category.id).order_by(Item.id.desc()).limit(10).all()
+    items = session.query(Item.id, Item.name, Category.name.label("cname")).filter_by(category_id=category.id).join(Category).order_by(Item.id.desc()).limit(10).all()
     print categories
     print items
-    return render_template('index.html', categories=categories, items=items, itemHeader="{} Items ({} items)".format(category.name, len(items)))
+    if 'username' not in login_session:
+        return render_template('publicIndex.html', categories=categories, items=items, itemHeader="{} Items ({} items)".format(category.name, len(items)))
+    else:
+        return render_template('index.html', categories=categories, items=items, itemHeader="{} Items ({} items)".format(category.name, len(items)))
 
 @app.route('/catalog/<category>/<item>')
 def itemDescription(category, item):
     categoryQuery = session.query(Category).filter_by(name=category).one()
     itemQuery = session.query(Item).filter_by(name=item, category_id=categoryQuery.id).one()
     print itemQuery.name
-    return render_template('itemDescription.html', item=itemQuery)
+    if 'username' not in login_session:
+        return render_template('publicItemDescription.html', item=itemQuery)
+    else:
+        return render_template('itemDescription.html', item=itemQuery)
+
+@app.route('/catalog/add', methods=['GET', 'POST'])
+def addItem():
+    # if not login redirect to login
+    if 'username' not in login_session:
+        return redirect(url_for('showLogin'))
+
+    if request.method == 'POST':
+        newItem = Item(name=request.form['title'], description=request.form['description'], category_id=int(request.form['category']))
+        session.add(newItem)
+        session.commit()
+        return redirect(url_for('catalogHomePage'))
+    else:
+        categories = session.query(Category).all()
+        return render_template('addItem.html', categories=categories)
+
+@app.route('/catalog/<item>/<int:item_id>/edit', methods=['GET', 'POST'])
+def editItem(item, item_id):
+    # if not login redirect to login
+    if 'username' not in login_session:
+        return redirect(url_for('showLogin'))
+    if request.method == 'POST':
+        return redirect(url_for('catalogHomePage'))
+    else:
+        editItem = session.query(Item).filter_by(id=item_id).one()
+        categories = session.query(Category).all()
+        print editItem.name
+        return render_template('editItem.html', item=editItem, categories=categories)
+
+
 
 @app.route('/gconnect', methods=['POST'])
 def gconnect():
@@ -123,21 +167,71 @@ def gconnect():
     data = answer.json()
 
     login_session['username'] = data['name']
-    login_session['picture'] = data['picture']
     login_session['email'] = data['email']
+
+    user_id = getUserID(login_session['email'])
+    if not user_id:
+        user_id = createUser(login_session)
+    login_session['user_id'] = user_id
 
     output = ''
     output += '<h1>Welcome, '
     output += login_session['username']
     output += '!</h1>'
-    output += '<img src="'
-    output += login_session['picture']
-    output += ' " style = "width: 300px; height: 300px;border-radius: 150px;-webkit-border-radius: 150px;-moz-border-radius: 150px;"> '
     flash("you are now logged in as %s" % login_session['username'])
     print "done!"
     return output
 
+@app.route('/gdisconnect', methods=['POST'])
+def gdisconnect():
+        # Only disconnect a connected user.
+    access_token = login_session.get('access_token')
+    if access_token is None:
+        response = make_response(
+            json.dumps('Current user not connected.'), 401)
+        response.headers['Content-Type'] = 'application/json'
+        return response
+    print "Hello"
+    url = 'https://accounts.google.com/o/oauth2/revoke?token=%s' % access_token
+    h = httplib2.Http()
+    result = h.request(url, 'GET')[0]
+    if result['status'] == '200':
+        # Reset the user's sesson.
+        del login_session['access_token']
+        del login_session['gplus_id']
+        del login_session['username']
+        del login_session['email']
+
+        response = make_response(json.dumps('Successfully disconnected.'), 200)
+        response.headers['Content-Type'] = 'application/json'
+        return response
+    else:
+        # For whatever reason, the given token was invalid.
+        response = make_response(
+            json.dumps('Failed to revoke token for given user.', 400))
+        response.headers['Content-Type'] = 'application/json'
+        return response
+
+def getUserID(email):
+    try:
+        user = session.query(User).filter_by(email = email).one()
+        return user.id
+    except:
+        return None
+
+def getUserInfo(user_id):
+    user = session.query(User).filter_by(id = user_id).one()
+    return user
+
+def createUser(login_session):
+    newUser = User(name = login_session['username'], email = login_session['email'])
+    session.add(newUser)
+    session.commit()
+    user = session.query(User).filter_by(email=login_session['email']).one()
+    return user.id
+
+
 if __name__ == "__main__":
     app.secret_key = 'super_secret_key'
     app.debug = True
-    app.run(host='0.0.0.0', port=8000)
+    app.run(host='127.0.0.1', port=3000)

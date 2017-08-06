@@ -6,8 +6,8 @@
 
   <header>
     <h2>Catalog App</h2>
-    <form action="/logout">
-    <input type="submit" value="LogOut" />
+    <form action="/login">
+    <input type="submit" value="Login" />
     </form>
   </header>
   <main>
@@ -23,9 +23,6 @@
     </aside>
     <aside>
       <div>
-        <a href='{{url_for('addItem')}}'>
-          Add Item
-        </a>
         <h3>{{itemHeader}}</h3>
         {% for i in items %}
         <a href="{{url_for('itemDescription', category=i.cname, item=i.name)}}">
