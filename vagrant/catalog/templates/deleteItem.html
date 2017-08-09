@@ -1,0 +1,16 @@
+{% extends "main.html" %}
+{% block content %}
+{% include "header.html" %}
+<main class="deleteMain">
+  <h3> Delete Item </h3>
+  <p class="itemDescription">
+    Are you sure you want to delete {{ item }}?
+  </p>
+  <form action="#" method="post">
+    <div class="formSubmit">
+      <button type="submit"> Submit </button>
+    </div>
+  </form>
+</main>
+
+{% endblock %}

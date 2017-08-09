@@ -1,37 +1,29 @@
-<html>
-<head>
-
-</head>
-<body>
-
-  <header>
-    <h2>Catalog App</h2>
-    <form action="/login">
-    <input type="submit" value="Login" />
-    </form>
-  </header>
-  <main>
-    <aside>
+{% extends "main.html" %}
+{% block content %}
+{% include "publicHeader.html" %}
+  <main class="main">
+    <aside class="categoriesAside">
       <div>
         <h3>Categories</h3>
         {% for i in categories %}
         <a href='{{url_for('catalogFilter', category=i.name)}}'>
           {{i.name}}
         </a>
+        <br>
         {% endfor %}
       </div>
     </aside>
-    <aside>
+    <div class="verticalLine">&nbsp;</div>
+    <aside class="itemsAside">
       <div>
         <h3>{{itemHeader}}</h3>
         {% for i in items %}
         <a href="{{url_for('itemDescription', category=i.cname, item=i.name)}}">
           {{i.name}}
         </a>
+        <br>
         {% endfor %}
       </div>
     </aside>
   </main>
-</body>
-
-</html>
+{% endblock %}

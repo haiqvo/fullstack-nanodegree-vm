@@ -1,0 +1,85 @@
+html, body {
+    height: 100%
+}
+.main {
+  height: 100%;
+  width: 80%;
+  margin: auto;
+  background-color: #fffdfd;
+  margin-top: 2%;
+  margin-bottom: 2%;
+}
+
+body {
+  background-color: #e4e4e4;
+  height: 100%
+}
+
+h3 {
+  padding: 2%;
+  margin:0;
+  font-size: 30px;
+}
+
+.categoriesAside {
+  display:inline-block;
+  float:left;
+  padding:5%;
+  width:15%
+}
+
+.itemsAside {
+  display:inline-block;
+  float:right;
+  padding:5%;
+  width:60%
+}
+
+.verticalLine {
+  display:inline-block;
+  float:left;
+  height:90%;
+  width:2px;
+  background-color:#000;
+  margin-top:5%;
+}
+
+.itemTitle {
+  padding: 2%;
+}
+
+textarea {
+  width: 80%
+}
+
+.itemDescription {
+  padding: 2%;
+}
+
+.editAdd {
+  padding: 2%;
+}
+
+.itemForm {
+  padding: 2%;
+}
+
+.formTitle {
+  margin: 10px;
+}
+
+.formText {
+  margin: 10px;
+}
+
+.formDescription {
+  margin: 10px;
+}
+
+.formCategory {
+  margin: 10px;
+}
+
+.formSubmit {
+  margin: 10px;
+}

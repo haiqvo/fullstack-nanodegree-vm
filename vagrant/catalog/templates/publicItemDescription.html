@@ -1,23 +1,12 @@
-<html>
-<head>
-
-</head>
-<body>
-
-  <header>
-    <h2>Catalog App</h2>
-    <form action="/login">
-    <input type="submit" value="Login" />
-    </form>
-  </header>
-  <main>
+{% extends "main.html" %}
+{% block content %}
+{% include "publicHeader.html" %}
+  <main class="main">
     <section>
-      <h3>{{item.name}}</h3>
-      <p>
+      <h3 class="itemTitle">{{item.name}}</h3>
+      <p class="itemDescription">
         {{item.description}}
       </p>
     </section>
   </main>
-</body>
-
-</html>
+{% endblock %}

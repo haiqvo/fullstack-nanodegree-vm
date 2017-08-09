@@ -1,27 +1,20 @@
-<html>
-<head>
-
-</head>
-<body>
-
-  <header>
-    <h2>Catalog App</h2>
-    <form action="/logout">
-    <input type="submit" value="LogOut" />
-    </form>
-  </header>
-  <main>
-    <aside>
+{% extends "main.html" %}
+{% block content %}
+{% include "header.html" %}
+  <main class="main">
+    <aside class="categoriesAside">
       <div>
         <h3>Categories</h3>
         {% for i in categories %}
         <a href='{{url_for('catalogFilter', category=i.name)}}'>
           {{i.name}}
         </a>
+        <br>
         {% endfor %}
       </div>
     </aside>
-    <aside>
+    <div class="verticalLine">&nbsp;</div>
+    <aside class="itemsAside">
       <div>
         <a href='{{url_for('addItem')}}'>
           Add Item
@@ -31,10 +24,9 @@
         <a href="{{url_for('itemDescription', category=i.cname, item=i.name)}}">
           {{i.name}}
         </a>
+        <br>
         {% endfor %}
       </div>
     </aside>
   </main>
-</body>
-
-</html>
+{% endblock %}

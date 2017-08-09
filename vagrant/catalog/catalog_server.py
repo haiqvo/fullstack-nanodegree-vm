@@ -28,8 +28,6 @@ session = DBSession()
 def catalogHomePage():
     categories = session.query(Category).all()
     items = session.query(Item.id, Item.name, Category.name.label("cname")).join(Category).order_by(Item.id.desc()).limit(10).all()
-    for i in items:
-        print i.cname
     if 'username' not in login_session:
         return render_template('publicIndex.html', categories=categories, items=items, itemHeader="Latest Items")
     else:
@@ -51,8 +49,6 @@ def catalogFilter(category):
     categories = session.query(Category).all()
     category = session.query(Category).filter_by(name=category).one()
     items = session.query(Item.id, Item.name, Category.name.label("cname")).filter_by(category_id=category.id).join(Category).order_by(Item.id.desc()).limit(10).all()
-    print categories
-    print items
     if 'username' not in login_session:
         return render_template('publicIndex.html', categories=categories, items=items, itemHeader="{} Items ({} items)".format(category.name, len(items)))
     else:
@@ -89,12 +85,30 @@ def editItem(item, item_id):
     if 'username' not in login_session:
         return redirect(url_for('showLogin'))
     if request.method == 'POST':
+        item_id = request.form['category_id']
+        modItem = session.query(Item).filter_by(id=item_id).one()
+        modItem.name = request.form['title']
+        modItem.description = request.form['description']
+        modItem.category_id = request.form['category']
+        session.commit()
         return redirect(url_for('catalogHomePage'))
     else:
         editItem = session.query(Item).filter_by(id=item_id).one()
         categories = session.query(Category).all()
-        print editItem.name
         return render_template('editItem.html', item=editItem, categories=categories)
+
+
+@app.route('/catalog/<item>/<int:item_id>/delete', methods=['GET', 'POST'])
+def deleteItem(item, item_id):
+    if 'username' not in login_session:
+        return redirect(url_for('showLogin'))
+    if request.method == 'POST':
+        itemToDelete = session.query(Item).filter_by(id=item_id).one()
+        session.delete(itemToDelete)
+        session.commit()
+        return redirect(url_for('catalogHomePage'))
+    else:
+        return render_template('deleteItem.html', item=item)
 
 
 
@@ -173,11 +187,7 @@ def gconnect():
     if not user_id:
         user_id = createUser(login_session)
     login_session['user_id'] = user_id
-
     output = ''
-    output += '<h1>Welcome, '
-    output += login_session['username']
-    output += '!</h1>'
     flash("you are now logged in as %s" % login_session['username'])
     print "done!"
     return output
@@ -193,6 +203,7 @@ def gdisconnect():
         return response
     print "Hello"
     url = 'https://accounts.google.com/o/oauth2/revoke?token=%s' % access_token
+    print url
     h = httplib2.Http()
     result = h.request(url, 'GET')[0]
     if result['status'] == '200':
@@ -211,6 +222,20 @@ def gdisconnect():
             json.dumps('Failed to revoke token for given user.', 400))
         response.headers['Content-Type'] = 'application/json'
         return response
+
+# api calls
+@app.route('/catalog.json')
+def catalogJSON():
+    categories = session.query(Category).all()
+    json_dict = []
+    for i in categories:
+        items = session.query(Item).filter_by(category_id=i.id).all()
+        cat_item = {"id":i.id, "name":i.name, "items":[]}
+        for j in items:
+            item_dict = {"id": j.id, "name": j.name, "description": j.description}
+            cat_item["items"].append(item_dict)
+        json_dict.append(cat_item)
+    return jsonify(Category=json_dict)
 
 def getUserID(email):
     try:
