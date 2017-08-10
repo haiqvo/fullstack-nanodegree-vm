@@ -8,21 +8,21 @@ Common code for the Relational Databases and Full Stack Fundamentals courses
 
 # Description
 results = URI
-Home page = / and catalog/ \n
-filter items = catalog/Snowboarding/items \n
-item description = catalog/Snowboarding/Snowboard \n
-add item (login require) = catalog/Snowboard/edit \n
-delete item (login require) = catalog/Snowboard/delete \n
-api call = catalog.json \n
+Home page = / and catalog/ <br />
+filter items = catalog/Snowboarding/items <br />
+item description = catalog/Snowboarding/Snowboard <br />
+add item (login require) = catalog/Snowboard/edit <br />
+delete item (login require) = catalog/Snowboard/delete <br />
+api call = catalog.json <br />
 
 # How To Run
-Setup the vagrant \n
-go to the catalog folder \n
-run `python catalog_server.py` \n
+Setup the vagrant <br />
+go to the catalog folder <br />
+run `python catalog_server.py` <br />
 
-Note: if you want to setup the db again \n
-remove or backup the categoryProject.db \n
-in the catalog folder \n
-run `python db_manager.py` \n
-if you want sample data \n
-run `python dbSetup.py` \n
+Note: if you want to setup the db again <br />
+remove or backup the categoryProject.db <br />
+in the catalog folder <br />
+run `python db_manager.py` <br />
+if you want sample data <br />
+run `python dbSetup.py` <br />
