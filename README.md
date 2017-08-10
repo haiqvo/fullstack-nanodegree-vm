@@ -4,24 +4,25 @@ fullstack-nanodegree-vm
 Common code for the Relational Databases and Full Stack Fundamentals courses
 
 # Catalog Project 
+ by Hai Vo
 
 # Description
 results = URI
-Home page = / and catalog/
-filter items = catalog/Snowboarding/items
-item description = catalog/Snowboarding/Snowboard
-add item (login require) = catalog/Snowboard/edit
-delete item (login require) = catalog/Snowboard/delete
-api call = catalog.json
+Home page = / and catalog/ \n
+filter items = catalog/Snowboarding/items \n
+item description = catalog/Snowboarding/Snowboard \n
+add item (login require) = catalog/Snowboard/edit \n
+delete item (login require) = catalog/Snowboard/delete \n
+api call = catalog.json \n
 
 # How To Run
-Setup the vagrant 
-go to the catalog folder
-run `python catalog_server.py`
+Setup the vagrant \n
+go to the catalog folder \n
+run `python catalog_server.py` \n
 
-Note: if you want to setup the db again
-remove or backup the categoryProject.db
-in the catalog folder
-run `python db_manager.py`
-if you want sample data
-run `python dbSetup.py`
+Note: if you want to setup the db again \n
+remove or backup the categoryProject.db \n
+in the catalog folder \n
+run `python db_manager.py` \n
+if you want sample data \n
+run `python dbSetup.py` \n
