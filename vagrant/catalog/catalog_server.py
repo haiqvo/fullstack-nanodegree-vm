@@ -7,7 +7,7 @@ from db_manager import Base, Category, Item, User
 from flask import session as login_session
 import random
 import string
-
+from functools import wraps
 from oauth2client.client import flow_from_clientsecrets
 from oauth2client.client import FlowExchangeError
 import httplib2
@@ -33,6 +33,16 @@ Base.metadata.bind = engine
 
 DBSession = sessionmaker(bind=engine)
 session = DBSession()
+
+
+# login wrapper
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'username' not in login_session:
+            return redirect('/login')
+        return f(*args, **kwargs)
+    return decorated_function
 
 
 # this is the main page
@@ -83,7 +93,7 @@ def logout():
 
 
 # this page is the same as home but filter by categories
-@app.route('/catalog/<category>/items')
+@app.route('/catalog/<path:category>/items')
 def catalogFilter(category):
     categories = session.query(Category).all()
     # query to filter items by category
@@ -114,7 +124,7 @@ def catalogFilter(category):
 
 
 # this is the item description page
-@app.route('/catalog/<category>/<item>')
+@app.route('/catalog/<path:category>/<path:item>')
 def itemDescription(category, item):
     # get the category id
     categoryQuery = session.query(Category).filter_by(name=category).one()
@@ -132,10 +142,8 @@ def itemDescription(category, item):
 
 # this is the add item page
 @app.route('/catalog/add', methods=['GET', 'POST'])
+@login_required
 def addItem():
-    # if not login redirect to login
-    if 'username' not in login_session:
-        return redirect(url_for('showLogin'))
 
     # if the form is submitted
     if request.method == 'POST':
@@ -154,11 +162,14 @@ def addItem():
 
 
 # this is the edit page
-@app.route('/catalog/<item>/<int:item_id>/edit', methods=['GET', 'POST'])
+@app.route('/catalog/<path:item>/<int:item_id>/edit', methods=['GET', 'POST'])
+@login_required
 def editItem(item, item_id):
-    # if not login redirect to login
-    if 'username' not in login_session:
-        return redirect(url_for('showLogin'))
+    item = session.query(Item).filter_by(id=item_id).one()
+    sessionUserId = getUserID(login_session["email"])
+    if item.user_id != sessionUserId:
+        flash("Not Authorized to edit that item")
+        return redirect(url_for('catalogHomePage'))
     # this is the post for submitting the form
     if request.method == 'POST':
         item_id = request.form['category_id']
@@ -178,11 +189,14 @@ def editItem(item, item_id):
 
 
 # the delete page
-@app.route('/catalog/<item>/<int:item_id>/delete', methods=['GET', 'POST'])
+@app.route('/catalog/<path:item>/<int:item_id>/delete', methods=['GET', 'POST'])
+@login_required
 def deleteItem(item, item_id):
-    # if not login redirect to login
-    if 'username' not in login_session:
-        return redirect(url_for('showLogin'))
+    item = session.query(Item).filter_by(id=item_id).one()
+    sessionUserId = getUserID(login_session["email"])
+    if item.user_id != sessionUserId:
+        flash("Not Authorized to edit that item")
+        return redirect(url_for('catalogHomePage'))
     # submit the delete
     if request.method == 'POST':
         itemToDelete = session.query(Item).filter_by(id=item_id).one()
@@ -271,7 +285,6 @@ def gconnect():
         user_id = createUser(login_session)
     login_session['user_id'] = user_id
     output = 'Welcome'
-    flash("you are now logged in as %s" % login_session['username'])
     print "done!"
     return output
 
