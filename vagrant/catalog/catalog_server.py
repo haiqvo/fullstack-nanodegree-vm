@@ -147,10 +147,12 @@ def addItem():
 
     # if the form is submitted
     if request.method == 'POST':
+        userId = getUserID(login_session["email"])
         # add new item
         newItem = Item(name=request.form['title'],
                        description=request.form['description'],
-                       category_id=int(request.form['category'])
+                       category_id=int(request.form['category']),
+                       user_id=userId
                        )
         session.add(newItem)
         session.commit()
@@ -189,7 +191,8 @@ def editItem(item, item_id):
 
 
 # the delete page
-@app.route('/catalog/<path:item>/<int:item_id>/delete', methods=['GET', 'POST'])
+@app.route('/catalog/<path:item>/<int:item_id>/delete',
+           methods=['GET', 'POST'])
 @login_required
 def deleteItem(item, item_id):
     item = session.query(Item).filter_by(id=item_id).one()
@@ -370,4 +373,4 @@ def createUser(login_session):
 if __name__ == "__main__":
     app.secret_key = 'super_secret_key'
     app.debug = True
-    app.run(host='0.0.0.0', port=8000)
+    app.run(host='127.0.0.1', port=8000)
